@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "node:http";
-import { routeRequest, options as wispOptions } from "@mercuryworkshop/wisp-js/server";
+import { server as wisp } from "@mercuryworkshop/wisp-js/server";
 
 const app = express();
 
@@ -12,9 +12,8 @@ app.get("/", (_request, response) => {
 
 const httpServer = createServer(app);
 
-// The library's defaults block private and loopback destinations. Keep those
-// protections enabled for a publicly reachable proxy endpoint.
-Object.assign(wispOptions, {
+// Keep the library's private and loopback destination protections enabled.
+Object.assign(wisp.options, {
   allow_private_ips: false,
   allow_loopback_ips: false,
   allow_direct_ip: true,
@@ -41,12 +40,11 @@ httpServer.on("upgrade", (request, socket, head) => {
     return;
   }
 
-  // routeRequest checks the raw URL, so normalize it to preserve the required
-  // trailing slash and remove any query string before handing it to Wisp.
+  // The Wisp router examines the raw URL; normalize it to keep the trailing slash.
   request.url = "/wisp/";
 
   try {
-    routeRequest(request, socket, head);
+    wisp.routeRequest(request, socket, head);
   } catch (error) {
     console.error("WISP upgrade failed:", error);
     rejectUpgrade(socket, 400, "Bad Request");
@@ -84,7 +82,6 @@ function shutdown(signal) {
     }
   });
 
-  // Prevent a stuck WebSocket or request from holding the Render process open.
   setTimeout(() => process.exit(0), 10_000).unref();
 }
 
