@@ -1,0 +1,16 @@
+{
+  "name": "wisp-render-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@mercuryworkshop/wisp-js": "^0.5.0",
+    "express": "^5.1.0"
+  }
+}
